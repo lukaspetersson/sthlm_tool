@@ -8,7 +8,13 @@ render() {
     return (
       <Map center={position} zoom={14}>
         <TileLayer
-          url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
+          url="https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png"
+        />
+		<TileLayer
+          url="http://openptmap.org/tiles/{z}/{x}/{y}.png"
+        />
+		<TileLayer
+          url="https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png"
         />
       </Map>
     );
