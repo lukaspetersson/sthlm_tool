@@ -10,6 +10,7 @@ type Props = {
 interface State {
   bus: boolean ,
   metro: boolean,
+  crossRoadMode: boolean,
 }
 
 class LeafletMap  extends React.Component<Props, State> {
@@ -19,6 +20,7 @@ class LeafletMap  extends React.Component<Props, State> {
 	  this.state = {
 		  bus: false,
 		  metro: false,
+		  crossRoadMode: false,
 	  }
 
   	}
@@ -26,12 +28,16 @@ class LeafletMap  extends React.Component<Props, State> {
 render() {
 	const position: [number, number] = [ 59.334591, 18.063240 ];
     return (
-		<>
-		<ToggleButtonGroup type="checkbox" className="mb-2">
+		<div>
+		<ToggleButtonGroup type="checkbox" className="mb-2" style={{position: "absolute", top: "8px", left:"64px", zIndex:2}}>
 		    <ToggleButton value={1} onChange={()=> {this.setState({bus: !this.state.bus})}}>Buss</ToggleButton>
 		    <ToggleButton value={2} onChange={()=> {this.setState({metro: !this.state.metro})}}>Tbana</ToggleButton>
 		  </ToggleButtonGroup>
-      <Map center={position} zoom={14}>
+		  <ToggleButtonGroup type="radio" name="tools" className="btn-group-vertical" style={{position: "absolute", top: "80px", left:"8px", zIndex:2}}>
+  		    <ToggleButton value={1}  onChange={()=> {this.setState({crossRoadMode: !this.state.crossRoadMode})}} style={{borderRadius : "5px", marginTop: "5px"}}>Korsning</ToggleButton>
+  		  </ToggleButtonGroup>
+
+      <Map style={{cursor: this.state.crossRoadMode? "crosshair":"grab"}} center={position} zoom={14}>
         <TileLayer
           url="https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png"
         />
@@ -46,7 +52,7 @@ render() {
 	        />
 		) : (<></>)}
       </Map>
-	  </>
+	  </div>
     );
   }
 }
