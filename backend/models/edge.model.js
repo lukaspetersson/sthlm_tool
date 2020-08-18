@@ -3,14 +3,13 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const edgeSchema = new Schema({
-  username: { type: String, required: true },
-  description: { type: String, required: true },
-  duration: { type: Number, required: true },
-  date: { type: Date, required: true },
+  nodeOneID: { type: String, required: true },
+  nodeTwoID: { type: String, required: true },
+  tier: { type: Number, default: 0 },
 }, {
   timestamps: true,
 });
 
-const Edge = mongoose.model('Exercise', edgeSchema);
+const Edge = mongoose.model('Edge', edgeSchema);
 
 module.exports = Edge;
