@@ -12,8 +12,8 @@ router.route('/add').post((req, res) => {
   const nodeTwoID = req.body.nodeTwoID;
 
   const newEdge = new Edge({
-		nodeOneID,
-		nodeTwoID
+		nodeOneID: nodeOneID,
+		nodeTwoID: nodeTwoID
 	});
 
   newEdge.save()

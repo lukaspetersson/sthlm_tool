@@ -19,14 +19,15 @@ router.route('/add').post((req, res) => {
     .catch(err => res.status(400).json('Error: ' + err));
 });
 
-router.route('/add_edge/:id').post((req, res) => {
-	Node.findOne({id: req.params.id})
+router.route('/add_edge/:_id').post((req, res) => {
+	console.log(req.params._id)
+	Node.findOne({_id: req.params._id})
   	.then(node => {
 
   		node.edges.push(req.body.edge)
 
   		node.save()
-  		.then(() => res.json("Edge assigned"))
+  		.then(() => res.json("Edge added"))
   		.catch(err => res.status(400).json('Error: ' + err));
   	})
   	.catch(err => res.status(400).json('Error: ' + err));
