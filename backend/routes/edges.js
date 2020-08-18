@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 const router = require('express').Router();
 let Edge = require('../models/edge.model');
 
@@ -8,20 +10,18 @@ router.route('/').get((req, res) => {
 });
 
 router.route('/add').post((req, res) => {
-  const username = req.body.username;
-  const description = req.body.description;
-  const duration = Number(req.body.duration);
-  const date = Date.parse(req.body.date);
+  const nodeOneID = req.body.nodeOneID;
+  const nodeTwoID = req.body.nodeTwoID;
+   let id = uuidv4();
 
   const newEdge = new Edge({
-    username,
-    description,
-    duration,
-    date,
-  });
+		id,
+		nodeOneID,
+		nodeTwoID
+	});
 
   newEdge.save()
-  .then(() => res.json('Edge added!'))
+  .then(() => res.json(id))
   .catch(err => res.status(400).json('Error: ' + err));
 });
 

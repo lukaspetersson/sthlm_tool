@@ -3,9 +3,10 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const nodeSchema = new Schema({
-  latitude: { type: Number, required: true },
-  longitude: { type: Number, required: true },
-  edges: { type: Array},
+	id: { type: String, required: true, unique: true },
+	longitude: { type: Number, required: true },
+	latitude: { type: Number, required: true },
+	edges: { type: Array},
 }, {
   timestamps: true,
 });
