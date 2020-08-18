@@ -3,13 +3,9 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const nodeSchema = new Schema({
-  username: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-    minlength: 3
-  },
+  latitude: { type: Number, required: true },
+  longitude: { type: Number, required: true },
+  edges: { type: Array},
 }, {
   timestamps: true,
 });
