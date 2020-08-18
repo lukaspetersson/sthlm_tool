@@ -25,4 +25,17 @@ router.route('/add').post((req, res) => {
   .catch(err => res.status(400).json('Error: ' + err));
 });
 
+router.route('/add_tier/:id').post((req, res) => {
+	Edge.findOne({id: req.params.id})
+  	.then(edge => {
+
+  		edge.tier = req.body.tier
+
+  		edge.save()
+  		.then(() => res.json("Tier assigned"))
+  		.catch(err => res.status(400).json('Error: ' + err));
+  	})
+  	.catch(err => res.status(400).json('Error: ' + err));
+});
+
 module.exports = router;
