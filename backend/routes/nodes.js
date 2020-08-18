@@ -1,4 +1,3 @@
-const { v4: uuidv4 } = require('uuid');
 const router = require('express').Router();
 let Node = require('../models/node.model');
 
@@ -10,14 +9,13 @@ router.route('/').get((req, res) => {
 
 router.route('/add').post((req, res) => {
   const pos = req.body.pos;
-  let long = pos[0]
-  let lat = pos[1]
-  let id = uuidv4();
+  const long = pos[0]
+  const lat = pos[1]
 
-  const newNode = new Node({id, long, lat});
+  const newNode = new Node({longitude: long, latitude: lat});
 
   newNode.save()
-    .then(() => res.json(id))
+    .then(node => res.json(node._id))
     .catch(err => res.status(400).json('Error: ' + err));
 });
 

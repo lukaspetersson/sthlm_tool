@@ -1,4 +1,3 @@
-const { v4: uuidv4 } = require('uuid');
 const router = require('express').Router();
 let Edge = require('../models/edge.model');
 
@@ -11,16 +10,14 @@ router.route('/').get((req, res) => {
 router.route('/add').post((req, res) => {
   const nodeOneID = req.body.nodeOneID;
   const nodeTwoID = req.body.nodeTwoID;
-   let id = uuidv4();
 
   const newEdge = new Edge({
-		id,
 		nodeOneID,
 		nodeTwoID
 	});
 
   newEdge.save()
-  .then(() => res.json(id))
+  .then(edge => res.json(edge._id))
   .catch(err => res.status(400).json('Error: ' + err));
 });
 
