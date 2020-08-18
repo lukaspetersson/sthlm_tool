@@ -10,10 +10,12 @@ router.route('/').get((req, res) => {
 router.route('/add').post((req, res) => {
   const nodeOneID = req.body.nodeOneID;
   const nodeTwoID = req.body.nodeTwoID;
+  const streetName = req.body.streetName;
 
   const newEdge = new Edge({
 		nodeOneID: nodeOneID,
-		nodeTwoID: nodeTwoID
+		nodeTwoID: nodeTwoID,
+		streetName: streetName
 	});
 
   newEdge.save()

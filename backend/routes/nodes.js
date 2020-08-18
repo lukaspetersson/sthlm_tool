@@ -23,14 +23,16 @@ router.route('/add_edge/:_id').post((req, res) => {
 	console.log(req.params._id)
 	Node.findOne({_id: req.params._id})
   	.then(node => {
+		console.log(node._id)
+
 
   		node.edges.push(req.body.edge)
 
   		node.save()
-  		.then(() => res.json("Edge added"))
+  		.then(() => res.json("Edge added to node"))
   		.catch(err => res.status(400).json('Error: ' + err));
   	})
-  	.catch(err => res.status(400).json('Error: ' + err));
+  	.catch(err => {res.status(400).json('Error: ' + err); console.log("HHHHHHHH"+err);});
 });
 
 

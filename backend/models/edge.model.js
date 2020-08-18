@@ -5,6 +5,7 @@ const Schema = mongoose.Schema;
 const edgeSchema = new Schema({
 	nodeOneID: { type: String, required: true },
 	nodeTwoID: { type: String, required: true },
+	streetName: { type: String},
 	tier: { type: Number, default: 0 },
 }, {
   timestamps: true,
