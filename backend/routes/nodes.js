@@ -8,23 +8,29 @@ router.route('/').get((req, res) => {
 });
 
 router.route('/add').post((req, res) => {
-  const pos = req.body.pos;
-  const long = pos[0]
-  const lat = pos[1]
+	const pos = req.body.pos
+	const long = pos[0]
+    const lat = pos[1]
+	Node.findOne({longitude: long, latitude: lat})
+  	.then(node => {
 
-  const newNode = new Node({longitude: long, latitude: lat});
+		if (!node){
+			node = new Node({longitude: long, latitude: lat});
+		}else{
+			console.log(node.longitude, node.latitude)
+		}
 
-  newNode.save()
-    .then(node => res.json(node._id))
-    .catch(err => res.status(400).json('Error: ' + err));
+		node.save()
+	      .then(node => res.json(node._id))
+	      .catch(err => res.status(400).json('Error: ' + err));
+  	})
+  	.catch(err => res.status(400).json('Error: ' + err));
+
 });
 
 router.route('/add_edge/:_id').post((req, res) => {
-	console.log(req.params._id)
 	Node.findOne({_id: req.params._id})
   	.then(node => {
-		console.log(node._id)
-
 
   		node.edges.push(req.body.edge)
 
@@ -32,7 +38,7 @@ router.route('/add_edge/:_id').post((req, res) => {
   		.then(() => res.json("Edge added to node"))
   		.catch(err => res.status(400).json('Error: ' + err));
   	})
-  	.catch(err => {res.status(400).json('Error: ' + err); console.log("HHHHHHHH"+err);});
+  	.catch(err => res.status(400).json('Error: ' + err));
 });
 
 
