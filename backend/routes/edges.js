@@ -19,7 +19,7 @@ router.route('/add').post((req, res) => {
 	});
 
   newEdge.save()
-  .then(edge => res.json(edge._id))
+  .then(edge => res.json(edge))
   .catch(err => res.status(400).json('Error: ' + err));
 });
 
@@ -30,7 +30,7 @@ router.route('/add_tier/:id').post((req, res) => {
   		edge.tier = req.body.tier
 
   		edge.save()
-  		.then(() => res.json("Tier assigned"))
+  		.then(edge => res.json(edge))
   		.catch(err => res.status(400).json('Error: ' + err));
   	})
   	.catch(err => res.status(400).json('Error: ' + err));

@@ -21,7 +21,7 @@ router.route('/add').post((req, res) => {
 		}
 
 		node.save()
-	      .then(node => res.json(node._id))
+	      .then(node => res.json(node))
 	      .catch(err => res.status(400).json('Error: ' + err));
   	})
   	.catch(err => res.status(400).json('Error: ' + err));
@@ -35,7 +35,7 @@ router.route('/add_edge/:_id').post((req, res) => {
   		node.edges.push(req.body.edge)
 
   		node.save()
-  		.then(() => res.json("Edge added to node"))
+  		.then(node => res.json(node))
   		.catch(err => res.status(400).json('Error: ' + err));
   	})
   	.catch(err => res.status(400).json('Error: ' + err));
