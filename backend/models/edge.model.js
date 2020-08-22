@@ -3,8 +3,16 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const edgeSchema = new Schema({
-	nodeOneID: { type: String, required: true },
-	nodeTwoID: { type: String, required: true },
+	nodeOne:{
+		id: { type: String, required: true },
+		longitude: { type: Number, required: true },
+		latitude: { type: Number, required: true },
+	},
+	nodeTwo:{
+		id: { type: String, required: true },
+		longitude: { type: Number, required: true },
+		latitude: { type: Number, required: true },
+	},
 	streetName: { type: String},
 	tier: { type: Number, default: 0 },
 }, {

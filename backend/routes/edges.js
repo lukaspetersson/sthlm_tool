@@ -8,14 +8,18 @@ router.route('/').get((req, res) => {
 });
 
 router.route('/add').post((req, res) => {
-  const nodeOneID = req.body.nodeOneID;
-  const nodeTwoID = req.body.nodeTwoID;
-  const streetName = req.body.streetName;
-
   const newEdge = new Edge({
-		nodeOneID: nodeOneID,
-		nodeTwoID: nodeTwoID,
-		streetName: streetName
+		nodeOne: {
+			id: req.body.nodeOne.id,
+			longitude: req.body.nodeOne.pos[0],
+			latitude: req.body.nodeOne.pos[1]
+		},
+		nodeTwo: {
+			id: req.body.nodeTwo.id,
+			longitude: req.body.nodeTwo.pos[0],
+			latitude: req.body.nodeTwo.pos[1]
+		},
+		streetName: req.body.streetName
 	});
 
   newEdge.save()
