@@ -6,6 +6,7 @@ import ToggleButton from 'react-bootstrap/ToggleButton'
 import axios from 'axios';
 
 
+
 type Props = {
 }
 
@@ -17,11 +18,18 @@ interface Node {
 }
 
 interface Edge {
-    node1: string,
-    node2: string,
+    node1: {
+		id: string,
+		long : number,
+		lat: number
+	},
+	node2: {
+		id: string,
+		long : number,
+		lat: number
+	},
 	name: string,
 	id: string,
-	used: boolean
 }
 
 interface State {
@@ -30,8 +38,6 @@ interface State {
   crossRoadMode: boolean,
   nodes: Node[],
   edges: Edge[],
-  circles: any[],
-  lines: any[]
 }
 
 class LeafletMap  extends React.Component<Props, State> {
@@ -44,20 +50,16 @@ class LeafletMap  extends React.Component<Props, State> {
 		  crossRoadMode: false,
 		  nodes: [],
 		  edges: [],
-		  circles: [],
-		  lines: []
 	  }
-	  this.getNodes = this.getNodes.bind(this);
-	  this.getEdges = this.getEdges.bind(this);
-	  this.getComponents = this.getComponents.bind(this);
+	  this.getInfo = this.getInfo.bind(this);
   	}
 
 
 	componentDidMount() {
-		this.getNodes()
+		this.getInfo()
 	}
 
-	getNodes() {
+	getInfo() {
 		axios.get('http://localhost:5000/nodes/')
 		.then((res) =>{
 			var nodes = []
@@ -72,63 +74,58 @@ class LeafletMap  extends React.Component<Props, State> {
 			}
 			this.setState({
 				nodes: nodes
-			}, () => {
-			    this.getEdges();
 			});
 		});
-	}
 
-	getEdges() {
 		axios.get('http://localhost:5000/edges/')
 		.then((res) =>{
 			var edges = []
 			for(var i = 0; i < res.data.length; i++){
 				const edge = {
-					node1 : res.data[i].nodeOneID,
-					node2 : res.data[i].nodeTwoID,
+					node1 : {
+						id: res.data[i].nodeOne.id,
+						long: res.data[i].nodeOne.longitude,
+						lat: res.data[i].nodeOne.latitude,
+					},
+					node2 : {
+						id: res.data[i].nodeTwo.id,
+						long: res.data[i].nodeTwo.longitude,
+						lat: res.data[i].nodeTwo.latitude,
+					},
 					name : res.data[i].streetName,
 					id: res.data[i]._id,
-					used: false
 				}
 				edges.push(edge)
 			}
 			this.setState({
 				edges: edges
-			}, () => {
-			    this.getComponents();
 			});
 		});
 	}
 
-	getComponents(){
-		if(this.state.nodes[0] && this.state.edges[0]){
-			for (var i = 0; i < this.state.nodes.length; i++){
-				const lat = this.state.nodes[i].lat
-				const long = this.state.nodes[i].long
-				const edges = this.state.nodes[i].edges
-				const circle = <CircleMarker center={{lat:lat, lng: long}} radius={1}/>
-				this.state.circles.push(circle)
 
-				for (var j = 0; i < edges.length; j++) {
+render() {
+	var circles = []
+	var lines = []
+	if(this.state.nodes[0]){
+		for (var i = 0; i < this.state.nodes.length; i++){
+			const lat = this.state.nodes[i].lat
+			const long = this.state.nodes[i].long
+			const edges = this.state.nodes[i].edges
+			const circle = <CircleMarker center={{lat:lat, lng:long}} radius={2}/>
+			circles.push(circle)
+		}
 
-					var obj = this.state.edges.find(edgeObj => edgeObj.id === edges[j])
-					if(obj){
-						console.log(obj)
-						if(!obj.used){
-							obj.used = true
-							const p1 = this.state.nodes.find(nodeObj => nodeObj.id === obj.node1)
-							const p2 = this.state.nodes.find(nodeObj => nodeObj.id === obj.node2)
-							if(p1 && p2){
-								const line = <Polyline positions={[[p1.lat, p1.long],[p2.lat, p2.long]]}/>
-								//this.state.lines.push(line)
-							}
-						}
-					}
-				}
-			}
+	}
+
+	if(this.state.edges[0]){
+		for (var i = 0; i < this.state.edges.length; i++){
+			const p1 = this.state.edges[i].node1
+			const p2 = this.state.edges[i].node2
+			const line = <Polyline positions={[[p1.lat, p1.long],[p2.lat, p2.long]]}/>
+			lines.push(line)
 		}
 	}
-render() {
 
 	const position: [number, number] = [ 59.334591, 18.063240 ];
     return (
@@ -145,8 +142,8 @@ render() {
         <TileLayer
           url="https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png"
         />
-		{this.state.circles}
-		{this.state.lines}
+		{circles}
+		{lines}
 		{this.state.bus ? (
 			<TileLayer
 	          url="http://openptmap.org/tiles/{z}/{x}/{y}.png"
