@@ -40,9 +40,8 @@ interface Edge {
 interface State {
   bus: boolean ,
   metro: boolean,
-  edgeMode: boolean,
-  nodeMode: boolean,
-  noMode: boolean,
+  toolMode: string,
+
   nodes: Node[],
   edges: Edge[],
   popUpPos: [number, number],
@@ -56,9 +55,7 @@ class LeafletMap  extends React.Component<Props, State> {
 	  this.state = {
 		  bus: false,
 		  metro: false,
-		  edgeMode: false,
-		  nodeMode: false,
-		  noMode: true,
+		  toolMode: "none",
 		  nodes: [],
 		  edges: [],
 		  popUpPos: undefined,
@@ -85,7 +82,7 @@ class LeafletMap  extends React.Component<Props, State> {
 	}
 
 	clickEdge(id : string, name : string, tier : number, lat: number, long: number) {
-		if(this.state.edgeMode){
+		if(this.state.toolMode === "edge"){
 			let msg = "ID: "+id+"<br />Namn: "+name+"<br />Tier: "+tier
 			console.log(msg)
 			this.setState({
@@ -94,10 +91,14 @@ class LeafletMap  extends React.Component<Props, State> {
 				popUpShow: true,
 			});
 		}
+
+		else if(this.state.toolMode === "tier1" || this.state.toolMode === "tier2" || this.state.toolMode === "tier3" || this.state.toolMode === "tier4" || this.state.toolMode === "bus"){
+			console.log(this.state.toolMode)
+		}
 	}
 
 	clickNode(id : string, long : number, lat : number) {
-		if(this.state.nodeMode){
+		if(this.state.toolMode === "node"){
 			let msg = "ID: "+id+"<br /> Position: "+lat+", "+long
 			console.log(msg)
 			this.setState({
@@ -157,11 +158,11 @@ class LeafletMap  extends React.Component<Props, State> {
 render() {
 	var radius = 2
 	var weight = 2
-	if(this.state.nodeMode){
+	if(this.state.toolMode === "node"){
 		radius = 10
 		weight = 1
 	}
-	else if(this.state.edgeMode){
+	else if(this.state.toolMode === "edge" || this.state.toolMode === "tier1" || this.state.toolMode === "tier2" || this.state.toolMode === "tier3" || this.state.toolMode === "tier4" || this.state.toolMode === "bus"){
 		radius = 8
 		weight = 10
 	}
@@ -195,10 +196,15 @@ render() {
 		    <ToggleButton value={1} onChange={()=> {this.setState({bus: !this.state.bus})}}>Buss</ToggleButton>
 		    <ToggleButton value={2} onChange={()=> {this.setState({metro: !this.state.metro})}}>Tbana</ToggleButton>
 		  </ToggleButtonGroup>
-		  <ToggleButtonGroup type="radio" name="tools" className="btn-group-vertical" style={{position: "absolute", top: "80px", left:"8px", zIndex:2}}>
-		  	<ToggleButton value={1} checked={this.state.noMode}  onChange={()=> {this.setState({noMode: !this.state.noMode, edgeMode: false, nodeMode: false, popUpShow: false})}} style={{borderRadius : "5px", marginTop: "5px"}}>None</ToggleButton>
-			<ToggleButton value={2} checked={this.state.edgeMode}  onChange={()=> {this.setState({edgeMode: !this.state.edgeMode, nodeMode: false, noMode: false})}} style={{borderRadius : "5px", marginTop: "5px"}}>Edge</ToggleButton>
-			<ToggleButton value={3} checked={this.state.nodeMode}  onChange={()=> {this.setState({nodeMode: !this.state.nodeMode, edgeMode: false, noMode: false})}} style={{borderRadius : "5px", marginTop: "5px"}}>Node</ToggleButton>
+		  <ToggleButtonGroup type="radio" name="tools" className="btn-group-vertical" onChange={()=> {this.setState({popUpShow: false})}} style={{position: "absolute", top: "80px", left:"8px", zIndex:2}}>
+		  	<ToggleButton value={1} checked={this.state.toolMode === "none"}  onChange={()=> {this.setState({toolMode: "none"})}} style={{borderRadius : "5px", marginTop: "5px"}}>None</ToggleButton>
+			<ToggleButton value={2} checked={this.state.toolMode === "edge"}  onChange={()=> {this.setState({toolMode: "edge"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Edge Info</ToggleButton>
+			<ToggleButton value={3} checked={this.state.toolMode === "node"}  onChange={()=> {this.setState({toolMode: "node"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Node Info</ToggleButton>
+			<ToggleButton value={4} checked={this.state.toolMode === "tier1"}  onChange={()=> {this.setState({toolMode: "tier1"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Set T1</ToggleButton>
+			<ToggleButton value={5} checked={this.state.toolMode === "tier2"}  onChange={()=> {this.setState({toolMode: "tier2"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Set T2</ToggleButton>
+			<ToggleButton value={6} checked={this.state.toolMode === "tier3"}  onChange={()=> {this.setState({toolMode: "tier3"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Set T3</ToggleButton>
+			<ToggleButton value={7} checked={this.state.toolMode === "tier4"}  onChange={()=> {this.setState({toolMode: "tier4"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Set T4</ToggleButton>
+			<ToggleButton value={8} checked={this.state.toolMode === "bus"}  onChange={()=> {this.setState({toolMode: "bus"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Set Bus</ToggleButton>
 		  </ToggleButtonGroup>
 
       <Map center={position} zoom={14}>
