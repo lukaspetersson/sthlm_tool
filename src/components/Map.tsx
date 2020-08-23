@@ -35,7 +35,8 @@ interface Edge {
 interface State {
   bus: boolean ,
   metro: boolean,
-  crossRoadMode: boolean,
+  edgeMode: boolean,
+  nodeMode: boolean,
   nodes: Node[],
   edges: Edge[],
 }
@@ -47,16 +48,32 @@ class LeafletMap  extends React.Component<Props, State> {
 	  this.state = {
 		  bus: false,
 		  metro: false,
-		  crossRoadMode: false,
+		  edgeMode: false,
+		  nodeMode: false,
 		  nodes: [],
 		  edges: [],
 	  }
 	  this.getInfo = this.getInfo.bind(this);
+	  this.clickEdge = this.clickEdge.bind(this);
+	  this.clickNode = this.clickNode.bind(this);
+
   	}
 
 
 	componentDidMount() {
 		this.getInfo()
+	}
+
+	clickEdge(id : string) {
+		if(this.state.edgeMode){
+			console.log(id)
+		}
+	}
+
+	clickNode(id : string) {
+		if(this.state.nodeMode){
+			console.log(id)
+		}
 	}
 
 	getInfo() {
@@ -111,8 +128,8 @@ render() {
 		for (var i = 0; i < this.state.nodes.length; i++){
 			const lat = this.state.nodes[i].lat
 			const long = this.state.nodes[i].long
-			const edges = this.state.nodes[i].edges
-			const circle = <CircleMarker center={{lat:lat, lng:long}} radius={2}/>
+			const id = this.state.nodes[i].id
+			const circle = <CircleMarker onClick={() => this.clickNode(id)} center={{lat:lat, lng:long}} radius={38}/>
 			circles.push(circle)
 		}
 
@@ -122,7 +139,8 @@ render() {
 		for (var i = 0; i < this.state.edges.length; i++){
 			const p1 = this.state.edges[i].node1
 			const p2 = this.state.edges[i].node2
-			const line = <Polyline positions={[[p1.lat, p1.long],[p2.lat, p2.long]]}/>
+			const id = this.state.edges[i].id
+			const line = <Polyline onClick={() => this.clickEdge(id)} positions={[[p1.lat, p1.long],[p2.lat, p2.long]]}/>
 			lines.push(line)
 		}
 	}
@@ -135,10 +153,11 @@ render() {
 		    <ToggleButton value={2} onChange={()=> {this.setState({metro: !this.state.metro})}}>Tbana</ToggleButton>
 		  </ToggleButtonGroup>
 		  <ToggleButtonGroup type="radio" name="tools" className="btn-group-vertical" style={{position: "absolute", top: "80px", left:"8px", zIndex:2}}>
-  		    <ToggleButton value={1}  onChange={()=> {this.setState({crossRoadMode: !this.state.crossRoadMode})}} style={{borderRadius : "5px", marginTop: "5px"}}>Korsning</ToggleButton>
+  		    <ToggleButton value={1}  onChange={()=> {this.setState({edgeMode: !this.state.edgeMode})}} style={{borderRadius : "5px", marginTop: "5px"}}>Edge</ToggleButton>
+			<ToggleButton value={1}  onChange={()=> {this.setState({nodeMode: !this.state.nodeMode})}} style={{borderRadius : "5px", marginTop: "5px"}}>Node</ToggleButton>
   		  </ToggleButtonGroup>
 
-      <Map style={{cursor: this.state.crossRoadMode? "crosshair":"grab"}} center={position} zoom={14}>
+      <Map style={{cursor: this.state.edgeMode? "crosshair":"grab"}} center={position} zoom={14}>
         <TileLayer
           url="https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png"
         />
