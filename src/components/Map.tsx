@@ -81,9 +81,9 @@ class LeafletMap  extends React.Component<Props, State> {
 		L.Marker.prototype.options.icon = DefaultIcon;
 	}
 
-	clickEdge(id : string, name : string, tier : number, lat: number, long: number) {
+	clickEdge(id : string, name : string, tier : number, bus: boolean, lat: number, long: number) {
 		if(this.state.toolMode === "edge"){
-			let msg = "ID: "+id+"<br />Namn: "+name+"<br />Tier: "+tier
+			let msg = "ID: "+id+"<br />Namn: "+name+"<br />Tier: "+tier+"<br />Bus: "+bus
 			console.log(msg)
 			this.setState({
 				popUpPos: [lat, long],
@@ -92,8 +92,22 @@ class LeafletMap  extends React.Component<Props, State> {
 			});
 		}
 
-		else if(this.state.toolMode === "tier1" || this.state.toolMode === "tier2" || this.state.toolMode === "tier3" || this.state.toolMode === "tier4" || this.state.toolMode === "bus"){
-			console.log(this.state.toolMode)
+		else if(this.state.toolMode === "tier1" || this.state.toolMode === "tier2" || this.state.toolMode === "tier3" || this.state.toolMode === "tier4"){
+			const tier = this.state.toolMode === "tier1"? 1: this.state.toolMode === "tier2"? 2: this.state.toolMode === "tier3"? 3: this.state.toolMode === "tier4"? 4:0
+			axios.post('http://localhost:5000/edges/set_tier/'+id, tier)
+						   .then(res => {
+							 console.log(res)
+							 this.state.edges.find(x => x.id === id).tier = res.data
+						   })
+						   .catch(err => console.log(err));
+		}
+		else if(this.state.toolMode === "bus"){
+			axios.post('http://localhost:5000/edges/toggle_bus/'+id)
+						   .then(res => {
+							 console.log(res)
+							 this.state.edges.find(x => x.id === id).bus = res.data
+						   })
+						   .catch(err => console.log(err));
 		}
 	}
 
@@ -184,7 +198,8 @@ render() {
 			const id = this.state.edges[i].id
 			const name = this.state.edges[i].name
 			const tier = this.state.edges[i].tier
-			const line = <Polyline onClick={() => this.clickEdge(id,name,tier, (p1.lat+p2.lat)/2, (p1.long+p2.long)/2)} positions={[[p1.lat, p1.long],[p2.lat, p2.long]]} weight={weight}/>
+			const bus = this.state.edges[i].bus
+			const line = <Polyline onClick={() => this.clickEdge(id,name,tier, bus, (p1.lat+p2.lat)/2, (p1.long+p2.long)/2)} positions={[[p1.lat, p1.long],[p2.lat, p2.long]]} weight={weight}/>
 			lines.push(line)
 		}
 	}
@@ -204,7 +219,7 @@ render() {
 			<ToggleButton value={5} checked={this.state.toolMode === "tier2"}  onChange={()=> {this.setState({toolMode: "tier2"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Set T2</ToggleButton>
 			<ToggleButton value={6} checked={this.state.toolMode === "tier3"}  onChange={()=> {this.setState({toolMode: "tier3"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Set T3</ToggleButton>
 			<ToggleButton value={7} checked={this.state.toolMode === "tier4"}  onChange={()=> {this.setState({toolMode: "tier4"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Set T4</ToggleButton>
-			<ToggleButton value={8} checked={this.state.toolMode === "bus"}  onChange={()=> {this.setState({toolMode: "bus"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Set Bus</ToggleButton>
+			<ToggleButton value={8} checked={this.state.toolMode === "bus"}  onChange={()=> {this.setState({toolMode: "bus"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Toggle Bus</ToggleButton>
 		  </ToggleButtonGroup>
 
       <Map center={position} zoom={14}>

@@ -15,6 +15,7 @@ const edgeSchema = new Schema({
 	},
 	streetName: { type: String},
 	tier: { type: Number, default: 0 },
+	bus: { type: Boolean, default: false },
 }, {
   timestamps: true,
 });

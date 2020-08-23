@@ -19,7 +19,9 @@ router.route('/add').post((req, res) => {
 			longitude: req.body.nodeTwo.pos[0],
 			latitude: req.body.nodeTwo.pos[1]
 		},
-		streetName: req.body.streetName
+		streetName: req.body.streetName,
+		tier: 0,
+		bus: false
 	});
 
   newEdge.save()
@@ -27,14 +29,27 @@ router.route('/add').post((req, res) => {
   .catch(err => res.status(400).json('Error: ' + err));
 });
 
-router.route('/add_tier/:id').post((req, res) => {
-	Edge.findOne({id: req.params.id})
+router.route('/set_tier/:id').post((req, res) => {
+	Edge.findOne({_id: req.params.id})
   	.then(edge => {
 
-  		edge.tier = req.body.tier
+  		edge.tier = Object.keys(req.body)[0]
 
   		edge.save()
-  		.then(() => res.json("Tier assigned"))
+  		.then(edge => res.json(edge.tier))
+  		.catch(err => res.status(400).json('Error: ' + err));
+  	})
+  	.catch(err => res.status(400).json('Error: ' + err));
+});
+
+router.route('/toggle_bus/:id').post((req, res) => {
+	Edge.findOne({_id: req.params.id})
+  	.then(edge => {
+
+		edge.bus = !edge.bus
+
+  		edge.save()
+  		.then(edge => res.json(edge.bus))
   		.catch(err => res.status(400).json('Error: ' + err));
   	})
   	.catch(err => res.status(400).json('Error: ' + err));
