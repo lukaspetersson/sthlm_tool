@@ -88,6 +88,7 @@ class LeafletMap  extends React.Component<Props, State> {
 	  this.getInfo = this.getInfo.bind(this);
 	  this.clickEdge = this.clickEdge.bind(this);
 	  this.clickNode = this.clickNode.bind(this);
+	  this.clickMap = this.clickMap.bind(this);
 	  this.addEdge = this.addEdge.bind(this);
 	  this.changeEdgeName = this.changeEdgeName.bind(this);
 
@@ -118,6 +119,8 @@ class LeafletMap  extends React.Component<Props, State> {
   }
 
 	addEdge(){
+
+		//TODO: add edge to node
 		const nodeOneID = this.state.addEdge.node1.id
 		const nodeOneCoords = [this.state.addEdge.node1.long, this.state.addEdge.node1.lat]
 		const nodeTwoID = this.state.addEdge.node2.id
@@ -156,6 +159,26 @@ class LeafletMap  extends React.Component<Props, State> {
 					})
 					   .catch(err => console.log(err));
 
+	}
+
+	clickMap(event : any){
+		if(this.state.toolMode === "addNode"){
+			const obj = {"pos" : [event.latlng.lng, event.latlng.lat]}
+			axios.post('http://localhost:5000/nodes/add/', obj)
+						   .then(res => {
+							   const node = {
+								   long : event.latlng.lng,
+								   lat : event.latlng.lat,
+								   edges : [],
+								   id: res.data,
+							   }
+								console.log("Node added: ",node)
+							 this.setState(prevState => ({
+								  nodes: [...prevState.nodes, node]
+								}))
+						})
+						   .catch(err => console.log(err));
+		}
 	}
 
 	clickEdge(id : string, name : string, tier : number, bus: boolean, lat: number, long: number) {
@@ -207,14 +230,41 @@ class LeafletMap  extends React.Component<Props, State> {
 							 for (var i = 0; i < this.state.edges.length; i++){
 								 var edge = this.state.edges[i]
 								 if(edge.id === id){
-									 var array = [...this.state.edges]
+									 let array = [...this.state.edges]
 									 array.splice(i, 1)
 									 this.setState({edges: array})
 								 }
 							 }
-						   })
-						   .catch(err => console.log(err));
-		}
+
+							 const nodeIDs : [string, string] = [res.data.nodeOne.id,res.data.nodeTwo.id]
+							 const obj = {"edge" : id}
+							 for (const nodeID of nodeIDs){
+								 axios.post('http://localhost:5000/nodes/delete_edge/'+nodeID, obj)
+	 				 						   .then(res => {
+												   for (var i = 0; i < this.state.nodes.length; i++){
+					  								 var node = this.state.nodes[i]
+					  								 if(node.id === nodeID){
+														 let array : string[] = []
+														 for(var j=0; j<node.edges.length;j++){
+															 const edgeId = node.edges[j]
+															 if(edgeId === id){
+																 array = node.edges
+	 															 array.splice(j, 1)
+															 }
+														 }
+														 node.edges = array
+														 let array2 = this.state.nodes
+														 array2.splice(i,1)
+														 array2.push(node)
+														 this.setState({nodes: array2})
+					  								 }
+					  							 }
+	 				 						})
+	 				 						   .catch(err => console.log(err));
+	 								   }
+	 						   })
+	 						   .catch(err => console.log(err));
+			 }
 	}
 
 	clickNode(id : string, long : number, lat : number) {
@@ -257,7 +307,7 @@ class LeafletMap  extends React.Component<Props, State> {
 			}
 		}
 		if(this.state.toolMode === "removeNode"){
-			// TODO: remove edges
+			// TODO: remove connecting edges
 			axios.delete('http://localhost:5000/nodes/delete/'+id)
 						   .then(res => {
 							 console.log("Node deleted",res)
@@ -379,7 +429,8 @@ render() {
 			<ToggleButton value={8} checked={this.state.toolMode === "bus"}  onChange={()=> {this.setState({toolMode: "bus"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Toggle Bus</ToggleButton>
 			<ToggleButton value={9} checked={this.state.toolMode === "addEdge"}  onChange={()=> {this.setState({toolMode: "addEdge"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Add Edge</ToggleButton>
 			<ToggleButton value={10} checked={this.state.toolMode === "removeEdge"}  onChange={()=> {this.setState({toolMode: "removeEdge"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Remove Edge</ToggleButton>
-			<ToggleButton value={11} checked={this.state.toolMode === "removeNode"}  onChange={()=> {this.setState({toolMode: "removeNode"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Remove Node</ToggleButton>
+			<ToggleButton value={11} checked={this.state.toolMode === "addNode"}  onChange={()=> {this.setState({toolMode: "addNode"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Add Node</ToggleButton>
+			<ToggleButton value={12} checked={this.state.toolMode === "removeNode"}  onChange={()=> {this.setState({toolMode: "removeNode"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Remove Node</ToggleButton>
 
 		  </ToggleButtonGroup>
 
@@ -405,7 +456,7 @@ render() {
 	        </Modal.Footer>
 	      </Modal>
 
-      <Map center={position} zoom={14}>
+      <Map center={position} zoom={14} onClick={this.clickMap} style={{cursor: this.state.toolMode === "addNode"? "pointer" : "grab"}}>
         <TileLayer
           url="https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png"
         />
