@@ -48,6 +48,7 @@ interface State {
   bus: boolean ,
   metro: boolean,
   toolMode: string,
+  visualMode: string,
   nodes: Node[],
   edges: Edge[],
   popUp:{
@@ -71,6 +72,7 @@ class LeafletMap  extends React.Component<Props, State> {
 		  bus: false,
 		  metro: false,
 		  toolMode: "none",
+		  visualMode: "none",
 		  nodes: [],
 		  edges: [],
 		  popUp:{
@@ -269,7 +271,7 @@ class LeafletMap  extends React.Component<Props, State> {
 									 edge.tier = res.data
 								 }
 							 }
-
+							 this.forceUpdate()
 						   })
 						   .catch(err => console.log(err));
 		}
@@ -283,7 +285,7 @@ class LeafletMap  extends React.Component<Props, State> {
 									 edge.bus = res.data
 								 }
 							 }
-
+							 this.forceUpdate()
 						   })
 						   .catch(err => console.log(err));
 		}
@@ -433,7 +435,17 @@ render() {
 			const name = this.state.edges[i].name
 			const tier = this.state.edges[i].tier
 			const bus = this.state.edges[i].bus
-			const line = <Polyline onClick={() => this.clickEdge(id,name,tier, bus, (p1.lat+p2.lat)/2, (p1.long+p2.long)/2)} positions={[[p1.lat, p1.long],[p2.lat, p2.long]]} weight={weight}/>
+
+			var color = "blue"
+			if(this.state.visualMode === "bus"){
+				if(bus){
+					color = "red"
+				}
+			}
+			else if(this.state.visualMode === "tier"){
+				color = tier === 1? "#ff0000" : tier === 2? "#ff00fb" : tier === 3? "#ffaa00": tier === 4? "#3cff00" : "blue"
+			}
+			const line = <Polyline color={color} onClick={() => this.clickEdge(id,name,tier, bus, (p1.lat+p2.lat)/2, (p1.long+p2.long)/2)} positions={[[p1.lat, p1.long],[p2.lat, p2.long]]} weight={weight}/>
 			lines.push(line)
 		}
 	}
@@ -444,6 +456,11 @@ render() {
 		<ToggleButtonGroup type="checkbox" className="mb-2" style={{position: "absolute", top: "8px", left:"64px", zIndex:2}}>
 		    <ToggleButton value={1} onChange={()=> {this.setState({bus: !this.state.bus})}}>Buss</ToggleButton>
 		    <ToggleButton value={2} onChange={()=> {this.setState({metro: !this.state.metro})}}>Tbana</ToggleButton>
+		  </ToggleButtonGroup>
+		  <ToggleButtonGroup type="radio" name="visual" className="mb-2" style={{position: "absolute", top: "8px", left:"200px", zIndex:2}}>
+			  <ToggleButton value={1} checked={this.state.visualMode === "none"}  onChange={()=> {this.setState({visualMode: "none"})}}>None</ToggleButton>
+			  <ToggleButton value={2} checked={this.state.visualMode === "tier"}  onChange={()=> {this.setState({visualMode: "tier"})}}>Tier</ToggleButton>
+			  <ToggleButton value={3} checked={this.state.visualMode === "bus"}  onChange={()=> {this.setState({visualMode: "bus"})}}>Bus</ToggleButton>
 		  </ToggleButtonGroup>
 		  <ToggleButtonGroup type="radio" name="tools" className="btn-group-vertical" onChange={()=> {this.setState({popUp:{pos: this.state.popUp.pos,msg: this.state.popUp.msg,show: false}})}} style={{position: "absolute", top: "80px", left:"8px", zIndex:2}}>
 		  	<ToggleButton value={1} checked={this.state.toolMode === "none"}  onChange={()=> {this.setState({toolMode: "none"})}} style={{borderRadius : "5px", marginTop: "5px"}}>None</ToggleButton>
