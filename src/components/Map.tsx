@@ -7,6 +7,9 @@ import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Modal from "react-bootstrap/Modal";
 import axios from 'axios';
+import NameInput from "./NameInput";
+
+
 
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
@@ -57,7 +60,7 @@ interface State {
 	  node2: Node,
 	  name: string,
 	  showModal: boolean
-  }
+  },
 }
 
 class LeafletMap  extends React.Component<Props, State> {
@@ -80,7 +83,7 @@ class LeafletMap  extends React.Component<Props, State> {
 			  node2: {} as Node,
 			  name: "",
 			  showModal: false,
-		  }
+		  },
 	  }
 	  this.getInfo = this.getInfo.bind(this);
 	  this.clickEdge = this.clickEdge.bind(this);
@@ -103,12 +106,12 @@ class LeafletMap  extends React.Component<Props, State> {
 		L.Marker.prototype.options.icon = DefaultIcon;
 	}
 
-	changeEdgeName(event : any) {
+	changeEdgeName(event : string[]) {
 	this.setState({
 		addEdge: {
 		 node1: this.state.addEdge.node1,
 		 node2: this.state.addEdge.node2,
-		 name: event.target.value,
+		 name: event[0],
 		 showModal: true
 	 }
 	});
@@ -148,9 +151,9 @@ class LeafletMap  extends React.Component<Props, State> {
 								   node2: {} as Node,
 								   name: "",
 								   showModal: false
-							   }
+							   },
 							}))
-					   })
+					})
 					   .catch(err => console.log(err));
 
 	}
@@ -233,7 +236,7 @@ class LeafletMap  extends React.Component<Props, State> {
 				edges : [],
 				id: id,
 			}
-			if(Object.keys(this.state.addEdge.node1).length === 0 && id !== this.state.addEdge.node1.id){
+			if(Object.keys(this.state.addEdge.node1).length !== 0 && id !== this.state.addEdge.node1.id){
 				this.setState({
 					addEdge: {
 					 node1: this.state.addEdge.node1,
@@ -275,7 +278,8 @@ class LeafletMap  extends React.Component<Props, State> {
 
 		axios.get('http://localhost:5000/edges/')
 		.then((res) =>{
-			var edges = []
+			var edges:Edge[] = []
+			var names:string[] = []
 			for(var i = 0; i < res.data.length; i++){
 				const edge = {
 					node1 : {
@@ -294,15 +298,19 @@ class LeafletMap  extends React.Component<Props, State> {
 					bus: res.data[i].bus
 				}
 				edges.push(edge)
+				if (!names.includes(res.data[i].streetName)) {
+					names.push(res.data[i].streetName)
+				}
 			}
 			this.setState({
-				edges: edges
+				edges: edges,
 			});
 		});
 	}
 
 
 render() {
+
 	var radius = 2
 	var weight = 2
 	if(this.state.toolMode === "node" || this.state.toolMode === "addEdge"){
@@ -371,12 +379,7 @@ render() {
 					 <Form.Label>
 					   Enter name of the street
 					 </Form.Label>
-					 <Form.Control
-					   type="text"
-					   value={this.state.addEdge.name}
-					   onChange={this.changeEdgeName}
-					   placeholder=""
-					 />
+						<NameInput nameFunction={this.changeEdgeName}/>
 				   </Form.Group>
 				 </Form>
 	        </Modal.Body>

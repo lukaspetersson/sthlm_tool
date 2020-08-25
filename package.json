@@ -10,6 +10,7 @@
     "@types/node": "^12.12.54",
     "@types/react": "^16.9.44",
     "@types/react-bootstrap": "^1.0.1",
+    "@types/react-bootstrap-typeahead": "^3.4.6",
     "@types/react-dom": "^16.9.8",
     "@types/react-leaflet": "^2.5.2",
     "axios": "^0.19.2",
@@ -17,9 +18,10 @@
     "leaflet": "^1.6.0",
     "react": "^16.13.1",
     "react-bootstrap": "^1.3.0",
+    "react-bootstrap-typeahead": "^5.1.1",
     "react-dom": "^16.13.1",
     "react-leaflet": "^2.7.0",
-    "react-scripts": "3.4.1",
+    "react-scripts": "^3.4.3",
     "typescript": "^3.9.7"
   },
   "scripts": {
