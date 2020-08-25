@@ -90,6 +90,7 @@ class LeafletMap  extends React.Component<Props, State> {
 	  this.clickNode = this.clickNode.bind(this);
 	  this.clickMap = this.clickMap.bind(this);
 	  this.addEdge = this.addEdge.bind(this);
+	  this.deleteEdge = this.deleteEdge.bind(this);
 	  this.changeEdgeName = this.changeEdgeName.bind(this);
 
 
@@ -161,6 +162,50 @@ class LeafletMap  extends React.Component<Props, State> {
 
 	}
 
+	deleteEdge(id: string){
+		axios.delete('http://localhost:5000/edges/delete/'+id)
+					   .then(res => {
+						 console.log("Edge deleted",res)
+						 for (var i = 0; i < this.state.edges.length; i++){
+							 var edge = this.state.edges[i]
+							 if(edge.id === id){
+								 let array = [...this.state.edges]
+								 array.splice(i, 1)
+								 this.setState({edges: array})
+							 }
+						 }
+
+						 const nodeIDs : [string, string] = [res.data.nodeOne.id,res.data.nodeTwo.id]
+						 const obj = {"edge" : id}
+						 for (const nodeID of nodeIDs){
+							 axios.post('http://localhost:5000/nodes/delete_edge/'+nodeID, obj)
+										   .then(res => {
+											   for (var i = 0; i < this.state.nodes.length; i++){
+												 var node = this.state.nodes[i]
+												 if(node.id === nodeID){
+													 let array : string[] = []
+													 for(var j=0; j<node.edges.length;j++){
+														 const edgeId = node.edges[j]
+														 if(edgeId === id){
+															 array = node.edges
+															 array.splice(j, 1)
+														 }
+													 }
+													 node.edges = array
+													 let array2 = this.state.nodes
+													 array2.splice(i,1)
+													 array2.push(node)
+													 this.setState({nodes: array2})
+												 }
+											 }
+										})
+										   .catch(err => console.log(err));
+										   //throws error when a node is deleted because the connected edges tries to delete the node that was deleted just before
+								   }
+						   })
+						   .catch(err => console.log(err));
+	}
+
 	clickMap(event : any){
 		if(this.state.toolMode === "addNode"){
 			const obj = {"pos" : [event.latlng.lng, event.latlng.lat]}
@@ -224,46 +269,7 @@ class LeafletMap  extends React.Component<Props, State> {
 						   .catch(err => console.log(err));
 		}
 		else if(this.state.toolMode === "removeEdge"){
-			axios.delete('http://localhost:5000/edges/delete/'+id)
-						   .then(res => {
-							 console.log("Edge deleted",res)
-							 for (var i = 0; i < this.state.edges.length; i++){
-								 var edge = this.state.edges[i]
-								 if(edge.id === id){
-									 let array = [...this.state.edges]
-									 array.splice(i, 1)
-									 this.setState({edges: array})
-								 }
-							 }
-
-							 const nodeIDs : [string, string] = [res.data.nodeOne.id,res.data.nodeTwo.id]
-							 const obj = {"edge" : id}
-							 for (const nodeID of nodeIDs){
-								 axios.post('http://localhost:5000/nodes/delete_edge/'+nodeID, obj)
-	 				 						   .then(res => {
-												   for (var i = 0; i < this.state.nodes.length; i++){
-					  								 var node = this.state.nodes[i]
-					  								 if(node.id === nodeID){
-														 let array : string[] = []
-														 for(var j=0; j<node.edges.length;j++){
-															 const edgeId = node.edges[j]
-															 if(edgeId === id){
-																 array = node.edges
-	 															 array.splice(j, 1)
-															 }
-														 }
-														 node.edges = array
-														 let array2 = this.state.nodes
-														 array2.splice(i,1)
-														 array2.push(node)
-														 this.setState({nodes: array2})
-					  								 }
-					  							 }
-	 				 						})
-	 				 						   .catch(err => console.log(err));
-	 								   }
-	 						   })
-	 						   .catch(err => console.log(err));
+				this.deleteEdge(id)
 			 }
 	}
 
@@ -318,6 +324,9 @@ class LeafletMap  extends React.Component<Props, State> {
 									 array.splice(i, 1)
 									 this.setState({nodes: array})
 								 }
+							 }
+							 for(var edgeId of res.data.edges){
+								 this.deleteEdge(edgeId)
 							 }
 						   })
 						   .catch(err => console.log(err));
