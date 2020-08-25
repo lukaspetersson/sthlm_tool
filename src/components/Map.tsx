@@ -120,8 +120,6 @@ class LeafletMap  extends React.Component<Props, State> {
   }
 
 	addEdge(){
-
-		//TODO: add edge to node
 		const nodeOneID = this.state.addEdge.node1.id
 		const nodeOneCoords = [this.state.addEdge.node1.long, this.state.addEdge.node1.lat]
 		const nodeTwoID = this.state.addEdge.node2.id
@@ -157,6 +155,27 @@ class LeafletMap  extends React.Component<Props, State> {
 								   showModal: false
 							   },
 							}))
+
+						const nodeIDs : [string, string] = [nodeOneID,nodeTwoID]
+   						 const obj = {"edge" : res.data}
+   						 for (const nodeID of nodeIDs){
+   							 axios.post('http://localhost:5000/nodes/add_edge/'+nodeID, obj)
+   										   .then(res => {
+   											   for (var i = 0; i < this.state.nodes.length; i++){
+   												 var node = this.state.nodes[i]
+   												 if(node.id === nodeID){
+													 node.edges.push(res.data)
+
+   													 let array = this.state.nodes
+   													 array.splice(i,1)
+   													 array.push(node)
+   													 this.setState({nodes: array})
+   												 }
+   											 }
+   										})
+   										   .catch(err => console.log(err));
+   								   }
+
 					})
 					   .catch(err => console.log(err));
 
@@ -313,7 +332,6 @@ class LeafletMap  extends React.Component<Props, State> {
 			}
 		}
 		if(this.state.toolMode === "removeNode"){
-			// TODO: remove connecting edges
 			axios.delete('http://localhost:5000/nodes/delete/'+id)
 						   .then(res => {
 							 console.log("Node deleted",res)
