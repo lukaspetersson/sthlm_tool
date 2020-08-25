@@ -256,6 +256,22 @@ class LeafletMap  extends React.Component<Props, State> {
 				});
 			}
 		}
+		if(this.state.toolMode === "removeNode"){
+			// TODO: remove edges
+			axios.delete('http://localhost:5000/nodes/delete/'+id)
+						   .then(res => {
+							 console.log("Node deleted",res)
+							 for (var i = 0; i < this.state.nodes.length; i++){
+								 var node = this.state.nodes[i]
+								 if(node.id === id){
+									 var array = [...this.state.nodes]
+									 array.splice(i, 1)
+									 this.setState({nodes: array})
+								 }
+							 }
+						   })
+						   .catch(err => console.log(err));
+		}
 	}
 
 	getInfo() {
@@ -313,7 +329,7 @@ render() {
 
 	var radius = 2
 	var weight = 2
-	if(this.state.toolMode === "node" || this.state.toolMode === "addEdge"){
+	if(this.state.toolMode === "node" || this.state.toolMode === "addEdge"|| this.state.toolMode === "removeNode"){
 		radius = 10
 		weight = 1
 	}
@@ -363,6 +379,7 @@ render() {
 			<ToggleButton value={8} checked={this.state.toolMode === "bus"}  onChange={()=> {this.setState({toolMode: "bus"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Toggle Bus</ToggleButton>
 			<ToggleButton value={9} checked={this.state.toolMode === "addEdge"}  onChange={()=> {this.setState({toolMode: "addEdge"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Add Edge</ToggleButton>
 			<ToggleButton value={10} checked={this.state.toolMode === "removeEdge"}  onChange={()=> {this.setState({toolMode: "removeEdge"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Remove Edge</ToggleButton>
+			<ToggleButton value={11} checked={this.state.toolMode === "removeNode"}  onChange={()=> {this.setState({toolMode: "removeNode"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Remove Node</ToggleButton>
 
 		  </ToggleButtonGroup>
 
