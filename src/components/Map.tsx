@@ -38,6 +38,7 @@ interface Edge {
 	name: string,
 	id: string,
 	tier: number,
+	bus: boolean
 }
 
 interface State {
@@ -46,9 +47,17 @@ interface State {
   toolMode: string,
   nodes: Node[],
   edges: Edge[],
-  popUpPos: [number, number],
-  popUpMsg: string,
-  firstNode: node,
+  popUp:{
+	  pos: [number, number],
+	  msg: string,
+	  show: boolean
+  },
+  addEdge: {
+	  node1: Node,
+	  node2: Node,
+	  name: string,
+	  showModal: boolean
+  }
 }
 
 class LeafletMap  extends React.Component<Props, State> {
@@ -61,13 +70,16 @@ class LeafletMap  extends React.Component<Props, State> {
 		  toolMode: "none",
 		  nodes: [],
 		  edges: [],
-		  popUpPos: undefined,
-		  popUpMsg: "",
-		  popUpShow: false,
+		  popUp:{
+			  pos: [0,0],
+			  msg: "",
+			  show: false
+		  },
 		  addEdge: {
-			  node1: null,
-			  node2: null,
-			  name: ""
+			  node1: {} as Node,
+			  node2: {} as Node,
+			  name: "",
+			  showModal: false,
 		  }
 	  }
 	  this.getInfo = this.getInfo.bind(this);
@@ -91,12 +103,13 @@ class LeafletMap  extends React.Component<Props, State> {
 		L.Marker.prototype.options.icon = DefaultIcon;
 	}
 
-	changeEdgeName(event) {
+	changeEdgeName(event : any) {
 	this.setState({
 		addEdge: {
 		 node1: this.state.addEdge.node1,
 		 node2: this.state.addEdge.node2,
-		 name: event.target.value
+		 name: event.target.value,
+		 showModal: true
 	 }
 	});
   }
@@ -125,14 +138,16 @@ class LeafletMap  extends React.Component<Props, State> {
 								name : name,
 								id: res.data,
 								tier: 0,
+								bus: false,
 							}
 							console.log("Edge added: ",edge)
 						 this.setState(prevState => ({
 							  edges: [...prevState.edges, edge],
 							  addEdge: {
-								   node1: null,
-								   node2: null,
+								   node1: {} as Node,
+								   node2: {} as Node,
 								   name: "",
+								   showModal: false
 							   }
 							}))
 					   })
@@ -145,9 +160,11 @@ class LeafletMap  extends React.Component<Props, State> {
 			let msg = "ID: "+id+"<br />Namn: "+name+"<br />Tier: "+tier+"<br />Bus: "+bus
 			console.log(msg)
 			this.setState({
-				popUpPos: [lat, long],
-				popUpMsg: msg,
-				popUpShow: true,
+				popUp:{
+	  			  pos: [lat, long],
+	  			  msg: msg,
+	  			  show: true
+	  		  }
 			});
 		}
 
@@ -156,7 +173,13 @@ class LeafletMap  extends React.Component<Props, State> {
 			axios.post('http://localhost:5000/edges/set_tier/'+id, tier)
 						   .then(res => {
 							 console.log("Tire set",res)
-							 this.state.edges.find(x => x.id === id).tier = res.data
+
+							 for(const edge of this.state.edges){
+								 if(edge.id === id){
+									 edge.tier = res.data
+								 }
+							 }
+
 						   })
 						   .catch(err => console.log(err));
 		}
@@ -164,7 +187,13 @@ class LeafletMap  extends React.Component<Props, State> {
 			axios.post('http://localhost:5000/edges/toggle_bus/'+id)
 						   .then(res => {
 							 console.log("Bus toggle",res)
-							 this.state.edges.find(x => x.id === id).bus = res.data
+
+							 for(const edge of this.state.edges){
+								 if(edge.id === id){
+									 edge.bus = res.data
+								 }
+							 }
+
 						   })
 						   .catch(err => console.log(err));
 		}
@@ -175,9 +204,11 @@ class LeafletMap  extends React.Component<Props, State> {
 			let msg = "ID: "+id+"<br /> Position: "+lat+", "+long
 			console.log(msg)
 			this.setState({
-				popUpPos: [lat, long],
-				popUpMsg: msg,
-				popUpShow: true,
+				popUp:{
+	  			  pos: [lat, long],
+	  			  msg: msg,
+	  			  show: true
+	  		  }
 			});
 		}
 		if(this.state.toolMode === "addEdge"){
@@ -187,20 +218,22 @@ class LeafletMap  extends React.Component<Props, State> {
 				edges : [],
 				id: id,
 			}
-			if(this.state.addEdge.node1 && id !== this.state.addEdge.node1.id){
+			if(Object.keys(this.state.addEdge.node1).length === 0 && id !== this.state.addEdge.node1.id){
 				this.setState({
 					addEdge: {
 					 node1: this.state.addEdge.node1,
 					 node2: node,
-					 name: this.state.addEdge.name
+					 name: this.state.addEdge.name,
+					 showModal: true
 				 }
 				});
 			}else{
 				this.setState({
 					addEdge: {
 					 node1: node,
-					 node2: null,
-					 name: this.state.addEdge.name
+					 node2: {} as Node,
+					 name: this.state.addEdge.name,
+					 showModal: false
 				 }
 				});
 			}
@@ -243,6 +276,7 @@ class LeafletMap  extends React.Component<Props, State> {
 					name : res.data[i].streetName,
 					id: res.data[i]._id,
 					tier: res.data[i].tier,
+					bus: res.data[i].bus
 				}
 				edges.push(edge)
 			}
@@ -295,7 +329,7 @@ render() {
 		    <ToggleButton value={1} onChange={()=> {this.setState({bus: !this.state.bus})}}>Buss</ToggleButton>
 		    <ToggleButton value={2} onChange={()=> {this.setState({metro: !this.state.metro})}}>Tbana</ToggleButton>
 		  </ToggleButtonGroup>
-		  <ToggleButtonGroup type="radio" name="tools" className="btn-group-vertical" onChange={()=> {this.setState({popUpShow: false})}} style={{position: "absolute", top: "80px", left:"8px", zIndex:2}}>
+		  <ToggleButtonGroup type="radio" name="tools" className="btn-group-vertical" onChange={()=> {this.setState({popUp:{pos: this.state.popUp.pos,msg: this.state.popUp.msg,show: false}})}} style={{position: "absolute", top: "80px", left:"8px", zIndex:2}}>
 		  	<ToggleButton value={1} checked={this.state.toolMode === "none"}  onChange={()=> {this.setState({toolMode: "none"})}} style={{borderRadius : "5px", marginTop: "5px"}}>None</ToggleButton>
 			<ToggleButton value={2} checked={this.state.toolMode === "edge"}  onChange={()=> {this.setState({toolMode: "edge"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Edge Info</ToggleButton>
 			<ToggleButton value={3} checked={this.state.toolMode === "node"}  onChange={()=> {this.setState({toolMode: "node"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Node Info</ToggleButton>
@@ -308,8 +342,8 @@ render() {
 		  </ToggleButtonGroup>
 
 		  <Modal
-	        show={this.state.addEdge.node2 != undefined && this.state.addEdge.node2 != null}
-	        onHide={()=> { this.setState(prevState => ({addEdge: {node1: null, node2: null, name: ""}}))}}
+	        show={this.state.addEdge.showModal}
+	        onHide={()=> { this.setState(prevState => ({addEdge: {node1: {} as Node, node2: {} as Node, name: "", showModal: false}}))}}
 	 			>
 	        <Modal.Header closeButton>
 	          <Modal.Title>Set streetname</Modal.Title>
@@ -340,8 +374,8 @@ render() {
         />
 		{circles}
 		{lines}
-		{this.state.popUpShow ? (
-			<Popup closeButton={false} autoClose={false} closeOnClick={false} position={this.state.popUpPos}><div dangerouslySetInnerHTML={{ __html: this.state.popUpMsg }} /></Popup>
+		{this.state.popUp.show ? (
+			<Popup closeButton={false} autoClose={false} closeOnClick={false} position={this.state.popUp.pos}><div dangerouslySetInnerHTML={{ __html: this.state.popUp.msg }} /></Popup>
 		) : (<></>)}
 		{this.state.bus ? (
 			<TileLayer
