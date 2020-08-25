@@ -197,6 +197,21 @@ class LeafletMap  extends React.Component<Props, State> {
 						   })
 						   .catch(err => console.log(err));
 		}
+		else if(this.state.toolMode === "removeEdge"){
+			axios.delete('http://localhost:5000/edges/delete/'+id)
+						   .then(res => {
+							 console.log("Edge deleted",res)
+							 for (var i = 0; i < this.state.edges.length; i++){
+								 var edge = this.state.edges[i]
+								 if(edge.id === id){
+									 var array = [...this.state.edges]
+									 array.splice(i, 1)
+									 this.setState({edges: array})
+								 }
+							 }
+						   })
+						   .catch(err => console.log(err));
+		}
 	}
 
 	clickNode(id : string, long : number, lat : number) {
@@ -294,7 +309,7 @@ render() {
 		radius = 10
 		weight = 1
 	}
-	else if(this.state.toolMode === "edge" || this.state.toolMode === "tier1" || this.state.toolMode === "tier2" || this.state.toolMode === "tier3" || this.state.toolMode === "tier4" || this.state.toolMode === "bus"){
+	else if(this.state.toolMode === "edge" || this.state.toolMode === "tier1" || this.state.toolMode === "tier2" || this.state.toolMode === "tier3" || this.state.toolMode === "tier4" || this.state.toolMode === "bus"|| this.state.toolMode === "removeEdge"){
 		radius = 8
 		weight = 10
 	}
@@ -339,6 +354,8 @@ render() {
 			<ToggleButton value={7} checked={this.state.toolMode === "tier4"}  onChange={()=> {this.setState({toolMode: "tier4"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Set T4</ToggleButton>
 			<ToggleButton value={8} checked={this.state.toolMode === "bus"}  onChange={()=> {this.setState({toolMode: "bus"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Toggle Bus</ToggleButton>
 			<ToggleButton value={9} checked={this.state.toolMode === "addEdge"}  onChange={()=> {this.setState({toolMode: "addEdge"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Add Edge</ToggleButton>
+			<ToggleButton value={10} checked={this.state.toolMode === "removeEdge"}  onChange={()=> {this.setState({toolMode: "removeEdge"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Remove Edge</ToggleButton>
+
 		  </ToggleButtonGroup>
 
 		  <Modal

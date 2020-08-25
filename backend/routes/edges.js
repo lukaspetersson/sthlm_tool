@@ -55,4 +55,12 @@ router.route('/toggle_bus/:id').post((req, res) => {
   	.catch(err => res.status(400).json('Error: ' + err));
 });
 
+router.route('/delete/:id').delete((req, res) => {
+	const id = req.params.id;
+	Edge.findOneAndRemove({ _id: id }).exec()
+	.then(edge => res.json(edge))
+	.catch(err => res.status(400).json('Error: ' + err));
+
+});
+
 module.exports = router;
