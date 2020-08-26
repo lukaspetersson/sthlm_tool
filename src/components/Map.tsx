@@ -292,6 +292,12 @@ class LeafletMap  extends React.Component<Props, State> {
 		else if(this.state.toolMode === "removeEdge"){
 				this.deleteEdge(id)
 			 }
+		else if(this.state.toolMode === "streetView"){
+				let url = "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint="+lat+","+long+"&heading=-45&pitch=38&fov=80"
+				window.open(url)
+			 }
+
+
 	}
 
 	clickNode(id : string, long : number, lat : number) {
@@ -351,6 +357,10 @@ class LeafletMap  extends React.Component<Props, State> {
 						   })
 						   .catch(err => console.log(err));
 		}
+		else if(this.state.toolMode === "streetView"){
+				let url = "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint="+lat+","+long+"&heading=-45&pitch=38&fov=80"
+				window.open(url)
+			 }
 	}
 
 	getInfo() {
@@ -412,7 +422,7 @@ render() {
 		radius = 10
 		weight = 1
 	}
-	else if(this.state.toolMode === "edge" || this.state.toolMode === "tier1" || this.state.toolMode === "tier2" || this.state.toolMode === "tier3" || this.state.toolMode === "tier4" || this.state.toolMode === "bus"|| this.state.toolMode === "removeEdge"){
+	else if(this.state.toolMode === "edge" || this.state.toolMode === "tier1" || this.state.toolMode === "tier2" || this.state.toolMode === "tier3" || this.state.toolMode === "tier4" || this.state.toolMode === "bus"|| this.state.toolMode === "removeEdge"|| this.state.toolMode === "streetView"){
 		radius = 8
 		weight = 10
 	}
@@ -462,7 +472,7 @@ render() {
 			  <ToggleButton value={2} checked={this.state.visualMode === "tier"}  onChange={()=> {this.setState({visualMode: "tier"})}}>Tier</ToggleButton>
 			  <ToggleButton value={3} checked={this.state.visualMode === "bus"}  onChange={()=> {this.setState({visualMode: "bus"})}}>Bus</ToggleButton>
 		  </ToggleButtonGroup>
-		  <ToggleButtonGroup type="radio" name="tools" className="btn-group-vertical" onChange={()=> {this.setState({popUp:{pos: this.state.popUp.pos,msg: this.state.popUp.msg,show: false}})}} style={{position: "absolute", top: "80px", left:"8px", zIndex:2}}>
+		  <ToggleButtonGroup type="radio" name="tools" className="btn-group-vertical" onChange={()=> {this.setState({popUp:{pos: this.state.popUp.pos,msg: this.state.popUp.msg,show: false}})}} style={{position: "absolute", top: "70px", left:"8px", zIndex:2}}>
 		  	<ToggleButton value={1} checked={this.state.toolMode === "none"}  onChange={()=> {this.setState({toolMode: "none"})}} style={{borderRadius : "5px", marginTop: "5px"}}>None</ToggleButton>
 			<ToggleButton value={2} checked={this.state.toolMode === "edge"}  onChange={()=> {this.setState({toolMode: "edge"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Edge Info</ToggleButton>
 			<ToggleButton value={3} checked={this.state.toolMode === "node"}  onChange={()=> {this.setState({toolMode: "node"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Node Info</ToggleButton>
@@ -475,7 +485,7 @@ render() {
 			<ToggleButton value={10} checked={this.state.toolMode === "removeEdge"}  onChange={()=> {this.setState({toolMode: "removeEdge"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Remove Edge</ToggleButton>
 			<ToggleButton value={11} checked={this.state.toolMode === "addNode"}  onChange={()=> {this.setState({toolMode: "addNode"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Add Node</ToggleButton>
 			<ToggleButton value={12} checked={this.state.toolMode === "removeNode"}  onChange={()=> {this.setState({toolMode: "removeNode"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Remove Node</ToggleButton>
-
+			<ToggleButton value={12} checked={this.state.toolMode === "streetView"}  onChange={()=> {this.setState({toolMode: "streetView"})}} style={{borderRadius : "5px", marginTop: "5px"}}>Street View</ToggleButton>
 		  </ToggleButtonGroup>
 
 		  <Modal
